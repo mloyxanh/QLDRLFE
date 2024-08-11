@@ -224,7 +224,7 @@ const AdminEvaluationForm = () => {
                         <tr>
                             <th>ID</th>
                             <th>Mã Sinh Viên</th>
-                            <th>Họ Tên Sinh Viên</th> {/* Thêm cột Họ Tên Sinh Viên */}
+                            <th>Họ Tên Sinh Viên</th>
                             <th>Mã Cố Vấn</th>
                             <th>Mã Lớp</th>
                             <th>Thời Gian Tạo</th>

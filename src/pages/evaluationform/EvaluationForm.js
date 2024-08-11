@@ -268,7 +268,7 @@ const EvaluationForm = () => {
                 <th colSpan={2}>Tối Đa {type.score} điểm</th>
             </tr>
             {subCriteriaTypes
-                .filter(subType => subType.criteriaType1 === type.id)
+                .filter(subType => subType.criteriaType === type.id)
                 .map((subType) => (
                     <React.Fragment key={subType.id}>
                         <tr>
@@ -305,7 +305,7 @@ const EvaluationForm = () => {
                             </td>
                         </tr>
                         {criterias
-                            .filter(criteria => criteria.subCriteriaType1 === subType.id) 
+                            .filter(criteria => criteria.subCriteriaType === subType.id) 
                             .map((criteria) => (
                                 <React.Fragment key={criteria.id}>
                                     <tr>

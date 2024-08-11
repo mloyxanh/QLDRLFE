@@ -7,6 +7,7 @@ const ClassEvaluationForm = () => {
     const [evaluations, setEvaluations] = useState([]);
     const [exist, setExist] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [studentNames, setStudentNames] = useState({});
     const [error, setError] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [criteriaTypes, setCriteriaTypes] = useState([]);
@@ -73,6 +74,7 @@ const ClassEvaluationForm = () => {
             setEvaluations(response.data);
             setExist(true);
             setLoading(false);
+            fetchStudentNames(response.data);
         })
         .catch(error => {
             setExist(false);
@@ -85,7 +87,23 @@ const ClassEvaluationForm = () => {
             .then(response => setSubCriteriaTypes(response.data))
             .catch(error => console.error('Error fetching sub criteria types:', error));
     };
+    const fetchStudentNames = (evaluations) => {
+        const studentIds = evaluations.map(evaluation => evaluation.student);
 
+        Promise.all(
+            studentIds.map(id => 
+                axios.get(`http://localhost:8080/api/students/${id}`)
+            )
+        ).then(responses => {
+            const names = responses.reduce((acc, response) => {
+                acc[response.data.id] = response.data.fullName;
+                return acc;
+            }, {});
+            setStudentNames(names);
+        }).catch(error => {
+            setError(error);
+        });
+    };
     const handleEdit = (evaluation) => {
         axios.get(`http://localhost:8080/api/eva-details/eva/${evaluation.id}`)
             .then(response => {
@@ -183,6 +201,7 @@ const ClassEvaluationForm = () => {
                         <tr>
                             <th>ID</th>
                             <th>Mã Sinh Viên</th>
+                            <th>Họ Tên Sinh Viên</th>
                             <th>Mã Lớp</th>
                             <th>Thời Gian Tạo</th>
                             <th>Tổng Điểm</th>
@@ -194,6 +213,7 @@ const ClassEvaluationForm = () => {
                             <tr key={evaluation.id}>
                                 <td>{evaluation.id}</td>
                                 <td>{evaluation.student}</td>
+                                <td>{studentNames[evaluation.student]}</td>
                                 <td>{evaluation.clazz}</td>
                                 <td>{new Date(evaluation.createdAt).toLocaleString()}</td>
                                 <td>{evaluation.evaluationDetails ? evaluation.evaluationDetails.reduce((sum, detail) => sum + detail.score, 0) : 0}</td>
