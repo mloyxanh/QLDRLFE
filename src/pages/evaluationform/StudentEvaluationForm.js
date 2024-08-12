@@ -11,6 +11,7 @@ const StudentEvaluationForm = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [criteriaTypes, setCriteriaTypes] = useState([]);
     const [criterias, setCriterias] = useState([]);
+    const [studentNames, setStudentNames] = useState({});
     const ids = localStorage.getItem('id');
     const cls = localStorage.getItem('cls');
     const [currentEvaluation, setCurrentEvaluation] = useState({
@@ -53,12 +54,13 @@ const StudentEvaluationForm = () => {
                 setLoading(false);
             });
     };
-
+    
     const fetchEvaluations = (studentId, semesterId) => {
         axios.get(`http://localhost:8080/api/evaluate/stueva/${studentId}/${semesterId}`)
             .then(response => {
                 setEvaluations(response.data);
                 setLoading(false);
+                fetchStudentName(response.data);
             })
             .catch(error => {
                 setEvaluations(null);
@@ -94,7 +96,19 @@ const StudentEvaluationForm = () => {
         setIsEditing(true);
         setShowModal(true);
     };
-
+    const fetchStudentName = (evaluation) => {
+        axios.get(`http://localhost:8080/api/students/${evaluation.student}`)
+            .then(response => {
+                const name = response.data.fullName;
+                setStudentNames(prevNames => ({
+                    ...prevNames,
+                    [evaluation.student]: name
+                }));
+            })
+            .catch(error => {
+                setError(error);
+            });
+    };
     const handleViewDetails = (evaluation) => {
         axios.get(`http://localhost:8080/api/eva-details/eva/${evaluation.id}`)
             .then(response => {
@@ -208,8 +222,10 @@ const StudentEvaluationForm = () => {
                     <tr>
                         <th>ID</th>
                         <th>Mã Sinh Viên</th>
+                        <th>Họ Tên Sinh Viên</th>
                         <th>Thời Gian Tạo</th>
                         <th>Tổng Điểm</th>
+                        <th>Xếp Hạng</th>
                         <th>Hành Động</th>
                     </tr>
                 </thead>
@@ -217,8 +233,20 @@ const StudentEvaluationForm = () => {
                     <tr>
                         <td>{evaluation.id}</td>
                         <td>{evaluation.student}</td>
+                        <td>{studentNames[evaluation.student]}</td>
                         <td>{new Date(evaluation.createdAt).toLocaleString()}</td>
                         <td>{evaluation.evaluationDetails ? evaluation.evaluationDetails.reduce((sum, detail) => sum + detail.score, 0) : 0}</td>
+                        <td>
+                            {(() => {
+                                const totalScore = evaluation.evaluationDetails ? evaluation.evaluationDetails.reduce((sum, detail) => sum + detail.score, 0) : 0;
+
+                                if (totalScore >= 90) return "Xuất sắc";
+                                if (totalScore >= 80) return "Tốt";
+                                if (totalScore >= 70) return "Khá";
+                                if (totalScore >= 50) return "Trung bình";
+                                if (totalScore < 50) return "Không đạt";
+                            })()}
+                        </td>
                         <td>
                         <Button variant="info" onClick={() => handleViewDetails(evaluation)}>Xem Chi Tiết</Button>
                         </td>

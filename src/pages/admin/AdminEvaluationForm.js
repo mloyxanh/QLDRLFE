@@ -229,6 +229,7 @@ const AdminEvaluationForm = () => {
                             <th>Mã Lớp</th>
                             <th>Thời Gian Tạo</th>
                             <th>Tổng Điểm</th>
+                            <th>Xếp Hạng</th>
                             <th>Hành Động</th>
                         </tr>
                     </thead>
@@ -242,6 +243,17 @@ const AdminEvaluationForm = () => {
                                 <td>{evaluation.clazz}</td>
                                 <td>{new Date(evaluation.createdAt).toLocaleString()}</td>
                                 <td>{evaluation.evaluationDetails ? evaluation.evaluationDetails.reduce((sum, detail) => sum + detail.score, 0) : 0}</td>
+                                <td>
+                                    {(() => {
+                                        const totalScore = evaluation.evaluationDetails ? evaluation.evaluationDetails.reduce((sum, detail) => sum + detail.score, 0) : 0;
+
+                                        if (totalScore >= 90) return "Xuất sắc";
+                                        if (totalScore >= 80) return "Tốt";
+                                        if (totalScore >= 70) return "Khá";
+                                        if (totalScore >= 50) return "Trung bình";
+                                        if (totalScore < 50) return "Không đạt";
+                                    })()}
+                                </td>
                                 <td>
                                     <Button variant="warning" onClick={() => handleEdit(evaluation)}>Sửa</Button>
                                     {' '}
@@ -265,7 +277,7 @@ const AdminEvaluationForm = () => {
                                 name="student"
                                 value={currentEvaluation.student}
                                 onChange={handleChange}
-                                disabled={isEditing} // Không cho phép sửa mã sinh viên khi đang ở chế độ sửa
+                                disabled={isEditing}
                             />
                         </Form.Group>
                         <Form.Group controlId="formAdvisorId">
